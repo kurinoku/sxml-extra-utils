@@ -1,0 +1,13 @@
+#lang scribble/manual
+@require[@for-label[sxml/extra-utils
+                    sxml
+                    racket/base]]
+
+@title{SXML Misc Utilities}
+@author{kurinoku}
+
+@defmodule[sxml/extra-utils]
+
+A module that has some sxml functions that might be of use
+
+
