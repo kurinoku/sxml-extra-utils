@@ -98,7 +98,7 @@ A module that has some sxml functions that might be of use
   }
 
 @defproc[(node-has-class? [class (or/c string? symbol?)]) sxml-converter]{
-  Like @racket[node-has-class?], but for only one class.
+  Like @racket[node-has-classes?], but for only one class.
 }
   
                                              
