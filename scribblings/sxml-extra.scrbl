@@ -13,7 +13,8 @@
    (define the-eval (make-base-eval))
    (the-eval `(begin (require sxml
                               sxml/extra-utils
-                              racket/pretty)
+                              racket/pretty
+                              racket/string)
                      (current-print pretty-print-handler))))
 
 @defmodule[sxml/extra-utils]
@@ -23,7 +24,22 @@ A module that has some sxml functions that might be of use
 @defproc[(sxml:text* [node-or-nodeset (or _node nodeset?)])
          string]{
   Like @racket[sxml:text] but it retrieves all string contents from a node,
-  in depth first post order.
+  in depth first post order, which is likely the rendered order and the expected one.
+
+  Consider the following
+
+  @interaction[#:eval the-eval
+    (define tree
+      '(body
+        (div "a ")
+        (div
+         (div "string ")
+         "in "
+         (div (span "or") "der"))))
+    (string-join ((sxpath "//text()") tree) "")
+    (sxml:text tree)
+    (sxml:text* tree)
+     ]
   }
 
 @defproc[(sxpath1
@@ -62,15 +78,21 @@ A module that has some sxml functions that might be of use
         (div (|@| (class "mt-2")))
         (div (|@| (class "mt-2 mb-2 p-1")))))
                
-    ((node-join (sxpath '(//))
-               (node-reduce (sxpath '(div))
-                            (node-has-classes? '("mt-2" "mb-2"))))
+    ((node-join
+      (sxpath '(//))
+      (node-reduce
+       (sxpath '(div))
+       (node-has-classes? '("mt-2" "mb-2"))))
     tree)
 
-   ((sxpath `(// div ,(node-has-classes? '("mt-2" "mb-2"))))
+   ((sxpath
+     `(// div
+          ,(node-has-classes? '("mt-2" "mb-2"))))
     tree)
 
-   ((sxpath `(// (div (,(node-has-classes? '("mt-2" "mb-2"))))))
+   ((sxpath
+     `(// (div
+           (,(node-has-classes? '("mt-2" "mb-2"))))))
     tree)
     ]
   }
