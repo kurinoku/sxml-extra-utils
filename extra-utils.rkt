@@ -1,15 +1,22 @@
 #lang racket/base
 
 (require racket/string
-         sxml)
+         sxml
+         static-rename)
 
 (provide sxml:text*
          sxpath1
+         
+         sxpath/e
+         sxpath1/e
+         
          sxpath*
          sxpath1*
 
          node-has-classes?
-         node-has-class?)
+         node-has-class?
+
+         (struct-out exn:fail:sxpath))
 
 (module+ test
   (require rackunit))
@@ -28,18 +35,36 @@
                      " U"))
    " test for dear U"))
 
-(define (sxpath->sxpath1 sxpath [name 'sxpath1])
+(struct exn:fail:sxpath exn:fail () #:transparent)
+
+(define ((-sxpath/e [who 'sxpath/e]) path [ns-bindings '()])
+  (define err-port (open-output-string))
+  (define f
+    (parameterize ([current-error-port err-port])
+      (sxpath path ns-bindings)))
+
+  (define err-string (get-output-string err-port))
+  (cond
+    [(non-empty-string? err-string)
+     (raise (exn:fail:sxpath (format "~a: ~a" who err-string) (current-continuation-marks)))]
+    [else f]))
+
+(define sxpath/e (-sxpath/e))
+
+(define (sxpath->sxpath1 sxpath)
   (define (sxpath1 path [ns-bindings '()])
     (define select (sxpath path ns-bindings))
-    (lambda (n)
-      (let ([v (select n)])
-        (if (null? v)
-            #f
-            (list-ref v 0)))))
+    (and select
+         (lambda (n)
+           (let ([v (select n)])
+             (if (null? v)
+                 #f
+                 (list-ref v 0))))))
 
-  (procedure-rename sxpath1 name))
+  sxpath1)
 
-(define sxpath1 (sxpath->sxpath1 sxpath 'sxpath1))
+(define sxpath1 (static-rename sxpath1 (sxpath->sxpath1 sxpath)))
+(define sxpath1/e (static-rename sxpath1/e (sxpath->sxpath1 (-sxpath/e 'sxpath1/e))))
 
 (module+ test
   ;; breadth first traversal
@@ -52,14 +77,12 @@
    #f))
    
 
-(define (selector->instant-selector sxpath [name 'instant:sxpath])
-  (procedure-rename
-   (lambda (path doc [ns-bindings '()])
-     ((sxpath path ns-bindings) doc))
-   name))
+(define (selector->instant-selector sxpath)
+  (lambda (path doc [ns-bindings '()])
+    ((sxpath path ns-bindings) doc)))
 
-(define sxpath1* (selector->instant-selector sxpath1 'sxpath1*)) 
-(define sxpath* (selector->instant-selector sxpath 'sxpath*)) 
+(define sxpath1* (static-rename sxpath1* (selector->instant-selector sxpath1/e))) 
+(define sxpath* (static-rename sxpath* (selector->instant-selector sxpath/e)))
 
 ; this came up while trying to understand the sxml lib
 ; if you put a procedure it expects two arguments

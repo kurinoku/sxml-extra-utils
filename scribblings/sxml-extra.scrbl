@@ -45,9 +45,25 @@ A module that has some sxml functions that might be of use
 @defproc[(sxpath1
           [path (or/c list? string?)]
           [ns-bindings (listof (cons/c symbol? string?)) '()])
-         (-> (or/c _node nodeset?) (or/c _node #f))]{
-  Like @racket[sxpath] but it returns the first element it finds on a breadth first search or it returns @racket[#f].
+         (or/c #f (-> (or/c _node nodeset?) (or/c _node #f)))]{
+  Like @racket[sxpath] but when the resulting function is applied it returns the first element it finds on a breadth first search or it returns @racket[#f].
   }
+
+@deftogether[(
+@defproc[(sxpath/e
+          [path (or/c list? string?)]
+          [ns-bindings (listof (cons/c symbol? string?)) '()])
+         (-> (or/c _node nodeset?) (or/c _node #f))]
+@defproc[(sxpath1/e
+          [path (or/c list? string?)]
+          [ns-bindings (listof (cons/c symbol? string?)) '()])
+         (-> (or/c _node nodeset?) (or/c _node #f))]
+ )]{
+  Like @racket[sxpath] and @racket[sxpath1], but it throws @racket[exn:fail:sxpath] instead of writing the error to @racket[(current-error-port)]
+  and returning @racket[#f].
+  }
+
+
 
 @deftogether[(
 @defproc[(sxpath*
@@ -59,8 +75,9 @@ A module that has some sxml functions that might be of use
           [path (or/c list? string?)]
           [doc (or/c _node nodeset?)]
           [ns-bindings (listof (cons/c symbol? string?)) '()])
-         (or/c _node #f)])]{
-  Equivalent to @racket[ ((_proc path ns-bindings) doc)  ] where @racket[_proc] is either @racket[sxpath] or @racket[sxpath1] respectively.
+         (or/c _node #f)]
+)]{
+  Equivalent to @racket[ ((_proc path ns-bindings) doc)  ] where @racket[_proc] is either @racket[sxpath/e] or @racket[sxpath1/e] respectively.
                 }
 
 @defproc[(node-has-classes? [class-lst (listof (or/c string? symbol?))]) sxml-converter]{
@@ -101,4 +118,6 @@ A module that has some sxml functions that might be of use
   Like @racket[node-has-classes?], but for only one class.
 }
   
-                                             
+@defstruct*[(exn:fail:sxpath exn:fail) ()]{
+  Exception thrown by @racket[sxpath/e] and similar.
+}
