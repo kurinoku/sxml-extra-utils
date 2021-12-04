@@ -118,6 +118,6 @@ A module that has some sxml functions that might be of use
   Like @racket[node-has-classes?], but for only one class.
 }
   
-@defstruct*[(exn:fail:sxpath exn:fail) ()]{
+@defstruct*[(exn:fail:sxpath exn:fail) () #:transparent]{
   Exception thrown by @racket[sxpath/e] and similar.
 }
