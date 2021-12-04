@@ -19,6 +19,6 @@ jobs:
       - name: Installing sxml-extra and its dependencies
         run: raco pkg install --no-docs --auto --name sxml-extra
       - name: Compiling sxml-extra and building its docs
-        run: raco setup --check-pkg-deps --unused-pkg-deps sxml-extra
+        run: raco setup --check-pkg-deps --unused-pkg-deps --pkgs sxml-extra
       - name: Testing sxml-extra
         run: raco test -x -p sxml-extra
