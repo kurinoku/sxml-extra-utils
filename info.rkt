@@ -8,4 +8,4 @@
 (define pkg-desc "Description Here")
 (define version "0.1")
 (define pkg-authors '(kurinoku))
-(define license '(MIT))
+(define license 'MIT)
